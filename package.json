@@ -1,17 +1,20 @@
 {
   "name": "mussh",
-  "version": "1.0.1",
+  "version": "1.0.5",
   "description": "MUlti SSH",
   "main": "index.js",
   "scripts": {
-    "postinstall": "node_modules/.bin/tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "bin": {
-    "tsc": "./bin/mussh"
+    "mussh": "./bin/mussh"
   },
   "author": "",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gregbacchus/mussh.git"
+  },
   "devDependencies": {
     "@types/ssh2": "^0.5.35",
     "@types/underscore": "^1.8.4",
