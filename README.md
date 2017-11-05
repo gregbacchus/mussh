@@ -2,6 +2,14 @@
 
 For running SSH commands on multiple servers.
 
+## Installation
+
+```bash
+npm i -g mussh
+```
+
+## Configuration
+
 Config file in `~/.mussh/config.yaml`
 
 ```yaml
@@ -37,6 +45,8 @@ servers:
     tags:
       - foo:bar
 ```
+
+## Usage
 
 To run on all web servers:
 
