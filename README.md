@@ -51,7 +51,7 @@ servers:
 To run on all web servers:
 
 ```bash
-mussh run -t web "ls -lah"
+mussh run -t role:web "ls -lah"
 ```
 
 To run on a specific server:
