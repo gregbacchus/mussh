@@ -1,0 +1,29 @@
+{
+  "name": "mussh",
+  "version": "1.0.0",
+  "description": "MUlti SSH",
+  "main": "index.js",
+  "scripts": {
+    "postinstall": "node_modules/.bin/tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "tsc": "./bin/mussh"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/ssh2": "^0.5.35",
+    "@types/underscore": "^1.8.4",
+    "@types/yamljs": "^0.2.30",
+    "@types/yargs": "^8.0.2",
+    "typescript": "^2.6.1"
+  },
+  "dependencies": {
+    "colors": "^1.1.2",
+    "ssh2": "^0.5.5",
+    "underscore": "^1.8.3",
+    "yamljs": "^0.3.0",
+    "yargs": "^10.0.3"
+  }
+}

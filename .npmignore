@@ -1,0 +1,10 @@
+/.idea
+*.suo
+/data
+/node_modules
+/coverage
+/_*
+/certs
+*.log
+.npmrc
+config.yaml
