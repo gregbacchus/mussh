@@ -1,12 +1,5 @@
 # Notes and Ideas
 
-## Ideas
-
-* output to files per host in given directory
-* pipe input script?
-* manage servers and auth from cli
-* upload/download files
-
 ## Error conditions to check
 
 * unable to lookup host

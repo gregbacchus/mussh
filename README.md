@@ -16,9 +16,6 @@ To run on a specific server:
 mussh run -i app1 "ls -lah" "df -h"
 ```
 
-** Coming soon: run local scripts on remote server **
-** Coming soon: SUDO_ASKPASS configuration **
-
 ## Matching
 
 Target servers will be selected from the config file by either id(s) ot tag(s).
@@ -37,15 +34,18 @@ npm i -g mussh
 
 Config file in `~/.mussh/config.yaml`
 
+**Note** known issue: `keyPath` can't currently resolve tilde `~`
+
 ```yaml
 auths:
   - id: default
     type: password
     username: myself
     password: super-secret
-  - id: other
+  - id: key
     type: rsa
-    file: ~/.ssh/id_rsa
+    username: myself
+    keyPath: /Users/me/.ssh/id_rsa
 servers:
   - id: web1
     hostname: web1.example.com
@@ -71,4 +71,14 @@ servers:
       - foo:bar
 ```
 
+## Roadmap
+
+* run local scripts on remote server
+* SUDO_ASKPASS configuration
+* better handling of multiple interactive logins
+* output to files per host in given directory
+* tidy errors
+* pipe input script?
+* manage servers and auth from cli
+* upload/download files
 
