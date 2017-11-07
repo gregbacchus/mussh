@@ -34,7 +34,7 @@ npm i -g mussh
 
 Config file in `~/.mussh/config.yaml`
 
-**Note** known issue: `keyPath` can't currently resolve tilde `~`
+**Fixed** `keyPath` can now resolve tilde `~`
 
 ```yaml
 auths:

@@ -1,3 +1,4 @@
+import expandTilde = require('expand-tilde');
 import fs = require('fs');
 import _ = require('underscore');
 import YAML = require('yamljs');
@@ -26,12 +27,30 @@ export class Config {
 
   public static load(paths: string[]): Config {
     for (const path of paths) {
-      if (!fs.existsSync(path)) continue;
-      const config = YAML.load(path);
+      const expandedPath = expandTilde(path);
+      if (!fs.existsSync(expandedPath)) continue;
+      const config = YAML.load(expandedPath);
       // TODO validate
+
+      Config.expandAuthsPaths(config.auths);
+      Config.expandServerPaths(config.servers);
       return new Config(config.auths, config.servers);
     }
     return new Config([], []);
+  }
+
+  private static expandAuthsPaths(auths: Auth[]) {
+    for (const auth of auths) {
+      if (auth.type !== 'rsa') continue;
+      auth.keyPath = expandTilde(auth.keyPath);
+    }
+  }
+
+  private static expandServerPaths(servers: IConfigServer[]) {
+    for (const server of servers) {
+      if (!server.auth || server.auth.type !== 'rsa') continue;
+      server.auth.keyPath = expandTilde(server.auth.keyPath);
+    }
   }
 
   private static isMatch(server: IConfigServer, ids?: string[], tags?: string[]): boolean {

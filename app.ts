@@ -14,7 +14,7 @@ import {
 import {asArray} from './util';
 
 const PATH_CONFIG = [
-  process.env.HOME + '/.mussh/config.yaml',
+  '~/.mussh/config.yaml',
 ];
 
 export class App {
