@@ -1,3 +1,4 @@
+import Validator from 'better-validator';
 import expandTilde = require('expand-tilde');
 import fs = require('fs');
 import _ = require('underscore');
@@ -23,6 +24,28 @@ export interface IConfigServer {
   tags?: string[];
 }
 
+const validator: any = Validator.create();
+const rule = input => {
+  input.required()
+    .isObject(configRule);
+};
+
+const configRule = config => {
+  config('auths').isObjectArray(authRule);
+  config('servers').isObjectArray(serverRule);
+};
+
+const authRule = auth => {
+};
+
+const serverRule = server => {
+  server('id').isString().isMatch(/^[\w\d-_\.]+$/);
+  server('hostname').required().isString();
+  server('ip').isString().isIn(['v4', 'v6']);
+  server('port').isNumber().integer().isInRange(1, 65535);
+  server('tags').isArray(item => item.required().isString());
+};
+
 export class Config {
 
   public static load(paths: string[]): Config {
@@ -31,7 +54,10 @@ export class Config {
       if (!fs.existsSync(expandedPath)) continue;
       const config = YAML.load(expandedPath);
       // TODO validate
-
+      const errors = validator(config, rule);
+      if (errors && errors.length) {
+        throw errors;
+      }
       Config.expandAuthsPaths(config.auths);
       Config.expandServerPaths(config.servers);
       return new Config(config.auths, config.servers);
