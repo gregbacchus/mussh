@@ -7,21 +7,6 @@ export interface IRunArgs extends ISearchArgs {
   script: string | string[];
 }
 
-export interface IConfig {
-  auths: Auth[];
-  servers: IConfigServer[];
-}
-
-export interface IConfigServer {
-  auth?: Auth;
-  authid?: string;
-  hostname: string;
-  id?: string;
-  ip?: 'v4' | 'v6';
-  port?: number;
-  tags?: string[];
-}
-
 export declare type Auth = IKeyAuth | IPasswordAuth;
 
 export interface IAuth {

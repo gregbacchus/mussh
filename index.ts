@@ -1,14 +1,12 @@
-import fs = require('fs');
 import _ = require('underscore');
 import YAML = require('yamljs');
 import yargs = require('yargs');
 import {Arguments, Argv, argv} from 'yargs';
+import {Config} from './config';
 import {Runner} from './runner';
 
 import {
   Auth,
-  IConfig,
-  IConfigServer,
   IRunArgs,
   ISearchArgs,
   IServer,
@@ -21,20 +19,6 @@ const PATH_CONFIG = [
 ];
 
 export class App {
-
-  private static isMatch(server: IConfigServer, ids: string[], tags: string[]): boolean {
-    if (ids.length) {
-      for (const id of ids) {
-        if (server.id !== id) return false;
-      }
-    }
-    if (tags.length) {
-      if (!server.tags || !server.tags.length) return false;
-
-      if (!_.intersection(server.tags, tags).length) return false;
-    }
-    return true;
-  }
 
   private static searchArgs() {
     return {
@@ -56,16 +40,12 @@ export class App {
     return true;
   }
 
-  private config: IConfig;
+  private config: Config;
   private argv: Arguments;
 
   constructor() {
     // read configuration
-    for (const path of PATH_CONFIG) {
-      if (!fs.existsSync(path)) continue;
-      this.config = YAML.load(path);
-      break;
-    }
+    this.config = Config.load(PATH_CONFIG);
   }
 
   public main() {
@@ -105,7 +85,7 @@ export class App {
    * `list` command
    */
   private list(argv: ISearchArgs) {
-    const servers = this.getMatchingServers(asArray(argv.id), asArray(argv.tag));
+    const servers = this.config.getMatchingServers(asArray(argv.id), asArray(argv.tag));
 
     // tslint:disable-next-line:no-console
     console.log(servers);
@@ -115,7 +95,7 @@ export class App {
    * `run` command
    */
   private run(argv: IRunArgs) {
-    const servers = this.getMatchingServers(asArray(argv.id), asArray(argv.tag));
+    const servers = this.config.getMatchingServers(asArray(argv.id), asArray(argv.tag));
 
     for (const server of servers) {
       const runner = new Runner(server);
@@ -129,27 +109,5 @@ export class App {
           .catch(console.error);
       });
     }
-  }
-
-  private getMatchingServers(ids: string[], tags: string[]): IServer[] {
-    if (!this.config || !this.config.servers) return [];
-
-    const indexAuths = this.config.auths
-      ? _.indexBy(this.config.auths, 'id')
-      : {};
-
-    const servers: IServer[] = [];
-    for (const server of this.config.servers) {
-      if (!App.isMatch(server, ids, tags)) continue;
-      servers.push({
-        auth: server.auth || server.authid && indexAuths[server.authid] as Auth || undefined,
-        hostname: server.hostname,
-        id: server.id,
-        ip: server.ip,
-        port: server.port || 22,
-        tags: server.tags || [],
-      });
-    }
-    return servers;
   }
 }

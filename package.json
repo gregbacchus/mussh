@@ -2,11 +2,14 @@
   "name": "mussh",
   "version": "1.0.5",
   "description": "MUlti SSH",
-  "main": "index.js",
+  "main": "./bin/mussh",
   "scripts": {
+    "prelint": "tsc",
+    "lint": "node_modules/.bin/tslint --project tsconfig.json",
     "preversion": "[[ \"$(git symbolic-ref --short HEAD)\" != \"master\" ]] && echo \"Must be in master branch\" && exit 1 || npm run lint -s && npm test -s",
     "postversion": "git push && git push --tags && npm publish",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "pretest": "tsc",
+    "test": "node_modules/.bin/jasmine"
   },
   "bin": {
     "mussh": "./bin/mussh"
@@ -18,10 +21,12 @@
     "url": "https://github.com/gregbacchus/mussh.git"
   },
   "devDependencies": {
+    "@types/jasmine": "^2.6.3",
     "@types/ssh2": "^0.5.35",
     "@types/underscore": "^1.8.4",
     "@types/yamljs": "^0.2.30",
     "@types/yargs": "^8.0.2",
+    "jasmine": "^2.8.0",
     "typescript": "^2.6.1"
   },
   "dependencies": {
