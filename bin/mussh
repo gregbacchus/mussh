@@ -1,4 +1,4 @@
 #!/usr/bin/env node
 
-const App = require('../').App;
+const App = require('../app').App;
 new App().main();
