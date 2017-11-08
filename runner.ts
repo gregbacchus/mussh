@@ -1,5 +1,6 @@
 import colors = require('colors/safe');
-import {read} from 'fs';
+import expandTilde = require('expand-tilde');
+import fs = require('fs');
 import readline = require('readline');
 import {Client, ConnectConfig} from 'ssh2';
 import {Writable} from 'stream';
@@ -25,7 +26,8 @@ export class Runner {
   }
 
   public async execFile(path: string) {
-
+    const buffer = fs.readFileSync(expandTilde(path));
+    await this.exec(buffer.toString());
   }
 
   public async exec(script: string) {

@@ -16,6 +16,12 @@ To run on a specific server:
 mussh run -i app1 "ls -lah" "df -h"
 ```
 
+To run a local script
+
+```bash
+mussh run -t role:web -s ~/scripts/test.sh
+```
+
 ## Matching
 
 Target servers will be selected from the config file by either id(s) ot tag(s).
@@ -73,7 +79,6 @@ servers:
 
 ## Roadmap
 
-* run local scripts on remote server
 * SUDO_ASKPASS configuration
 * better handling of multiple interactive logins
 * output to files per host in given directory
