@@ -1,9 +1,12 @@
-import Validator from 'better-validator';
+import Validator = require('better-validator');
 import expandTilde = require('expand-tilde');
 import fs = require('fs');
 import _ = require('underscore');
 import YAML = require('yamljs');
 
+const FailureFormatter = Validator.format.failure.FailureFormatter;
+
+import {IsObject} from 'better-validator/src/IsObject';
 import {
   Auth,
   IServer,
@@ -24,26 +27,30 @@ export interface IConfigServer {
   tags?: string[];
 }
 
-const validator: any = Validator.create();
-const rule = input => {
-  input.required()
-    .isObject(configRule);
-};
-
 const configRule = config => {
   config('auths').isObjectArray(authRule);
   config('servers').isObjectArray(serverRule);
+  config().strict();
 };
 
 const authRule = auth => {
+  auth('id').required().isString().isMatch(/^[\w\d-_\.]+$/);
+  auth('type').isString().isIn(['password', 'rsa']);
+  auth('username').required().isString();
+  auth('password').isString();
+  auth('keyPath').isString();
+  auth().strict();
 };
 
 const serverRule = server => {
   server('id').isString().isMatch(/^[\w\d-_\.]+$/);
   server('hostname').required().isString();
+  server('authid').isString();
+  server('auth').isObject();
   server('ip').isString().isIn(['v4', 'v6']);
   server('port').isNumber().integer().isInRange(1, 65535);
   server('tags').isArray(item => item.required().isString());
+  server().strict();
 };
 
 export class Config {
@@ -53,10 +60,19 @@ export class Config {
       const expandedPath = expandTilde(path);
       if (!fs.existsSync(expandedPath)) continue;
       const config = YAML.load(expandedPath);
-      // TODO validate
-      const errors = validator(config, rule);
+      const validator = Validator.create({
+        failureFormatter: new FailureFormatter({}),
+      });
+      validator(config)
+        .required()
+        .isObject(configRule);
+      const errors: any[] = validator.run();
       if (errors && errors.length) {
-        throw errors;
+        let message = 'Config is invalid:\n';
+        for (const error of errors) {
+          message += `${error.parameter} (${error.value}) failed ${error.failed}\n`;
+        }
+        throw new Error(message);
       }
       Config.expandAuthsPaths(config.auths);
       Config.expandServerPaths(config.servers);

@@ -3,6 +3,7 @@
 ## Error conditions to check
 
 * unable to lookup host
+* ip incorrect version
 * unable to connect (network)
 * failed login
 * login (manual) timeout
