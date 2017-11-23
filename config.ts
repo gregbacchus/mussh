@@ -1,4 +1,5 @@
 import Validator = require('better-validator');
+import {ChildValidator} from 'better-validator/src/IsObject';
 import expandTilde = require('expand-tilde');
 import fs = require('fs');
 import _ = require('underscore');
@@ -27,26 +28,27 @@ export interface IConfigServer {
   tags?: string[];
 }
 
-const configRule = config => {
+const configRule = (config: ChildValidator) => {
   config('auths').isObjectArray(authRule);
   config('servers').isObjectArray(serverRule);
   config().strict();
 };
 
-const authRule = auth => {
+const authRule = (auth: ChildValidator) => {
   auth('id').required().isString().isMatch(/^[\w\d-_\.]+$/);
   auth('type').isString().isIn(['password', 'rsa']);
   auth('username').required().isString();
+  auth('askPass').isString();
   auth('password').isString();
   auth('keyPath').isString();
   auth().strict();
 };
 
-const serverRule = server => {
+const serverRule = (server: ChildValidator) => {
   server('id').isString().isMatch(/^[\w\d-_\.]+$/);
   server('hostname').required().isString();
   server('authid').isString();
-  server('auth').isObject();
+  server('auth').isObject(() => {});
   server('ip').isString().isIn(['v4', 'v6']);
   server('port').isNumber().integer().isInRange(1, 65535);
   server('tags').isArray(item => item.required().isString());
