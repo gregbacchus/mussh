@@ -79,11 +79,11 @@ servers:
 
 ## Roadmap
 
-* SUDO_ASKPASS configuration
-* better handling of multiple interactive logins
-* output to files per host in given directory
-* tidy errors
-* pipe input script?
-* manage servers and auth from cli
-* upload/download files
+* [ ] SUDO_ASKPASS configuration
+* [x] better handling of multiple interactive logins
+* [ ] output to files per host in given directory
+* [ ] tidy errors
+* [ ] pipe input script?
+* [ ] manage servers and auth from cli
+* [ ] upload/download files
 

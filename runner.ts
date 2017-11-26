@@ -5,6 +5,9 @@ import readline = require('readline');
 import {Client, ConnectConfig} from 'ssh2';
 import {Writable} from 'stream';
 import {IServer} from './types';
+import {WorkQueue} from './worker';
+
+const queue = WorkQueue.get('default');
 
 class MutableWriter {
   public muted: boolean = false;
@@ -35,40 +38,43 @@ export class Runner {
 
     // handle interactive login
     conn.on('keyboard-interactive', (name, instructions, instructionsLang, prompts, finish) => {
-      // TODO: all this better
-      process.stdout.write(colors.yellow(`${this.server.id} <<-\n`));
-      const writer = new MutableWriter();
-      const results: string[] = [];
-
-      let prompt = prompts.shift();
-      if (!prompt) {
+      if (!prompts.length) {
         finish([]);
         return;
       }
-      process.stdout.write(prompt.prompt);
-      writer.muted = !prompt.echo;
-      const reader = readline
-        .createInterface({
-          input: process.stdin,
-          output: writer.getWriter(),
-          terminal: true,
+
+      const results: string[] = [];
+      const writer = new MutableWriter();
+      let pending = prompts.length;
+      for (const prompt of prompts) {
+        queue.add(done => {
+          // write server
+          process.stdout.write(colors.green(`<<- ${this.server.id} #\n`));
+
+          // write prompt
+          process.stdout.write(prompt.prompt);
+          writer.muted = !prompt.echo;
+
+          // read response
+          const reader = readline
+            .createInterface({
+              input: process.stdin,
+              output: writer.getWriter(),
+              terminal: true,
+            });
+          reader.on('line', line => {
+            results.push(line);
+            if (prompt && !prompt.echo) {
+              process.stdout.write('\n');
+            }
+            reader.close();
+            done();
+          });
+        }, () => {
+          if (--pending) return;
+          finish(results);
         });
-      reader.on('line', line => {
-        results.push(line);
-        if (prompt && !prompt.echo) {
-          process.stdout.write('\n');
-        }
-        if (prompts.length) {
-          prompt = prompts.shift();
-          if (prompt) {
-            process.stdout.write(prompt.prompt);
-            writer.muted = !prompt.echo;
-            return;
-          }
-        }
-        reader.close();
-        finish(results);
-      });
+      }
     });
     conn.on('ready', () => {
       conn.exec(script, (err, stream) => {
@@ -79,10 +85,16 @@ export class Runner {
             conn.end();
           })
           .on('data', data => {
-            process.stdout.write(colors.yellow(`${this.server.id} ->>\n`) + data + '\n');
+            queue.add(done => {
+              process.stdout.write(colors.yellow(`# ${this.server.id} ->>\n`) + data + '\n');
+              done();
+            });
           })
           .stderr.on('data', data => {
-            process.stdout.write(colors.red(`${this.server.id}: ERROR ${data}\n`));
+            queue.add(done => {
+              process.stdout.write(colors.red(`${this.server.id}: ERROR ${data}\n`));
+              done();
+            });
           });
       });
     });
@@ -95,7 +107,7 @@ export class Runner {
       forceIPv6: this.server.ip === 'v6',
       host: this.server.hostname,
       port: this.server.port,
-      readyTimeout: 60000,
+      readyTimeout: 120000,
       tryKeyboard: true,
       username: this.server.auth
         ? this.server.auth.username
