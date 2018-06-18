@@ -1,6 +1,6 @@
 {
   "name": "mussh",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "description": "MUlti SSH",
   "main": "./bin/mussh",
   "scripts": {
