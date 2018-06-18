@@ -64,6 +64,7 @@ export class App {
           .example('$0 list -t role:web -t region:us', 'matches servers with tag `role:web` and `region:us`')
           .example('$0 list -i server-id', 'matches servers id `server-id`')
           .options(App.searchArgs() as any)
+          .boolean('all')
           .check(App.searchCheck);
       }, this.list.bind(this))
       .command(['run', 'r'], 'run a the command in remote sessions', (run: Argv) => {
@@ -78,6 +79,7 @@ export class App {
               type: 'string',
             },
           }))
+          .boolean('all')
           .check(App.searchCheck);
       }, this.run.bind(this))
       .command(['tags', 'tag'], 'list available tags', this.tags.bind(this))
