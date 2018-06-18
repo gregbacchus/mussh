@@ -1,4 +1,5 @@
 export interface ISearchArgs {
+  all: boolean;
   id: string | string[];
   tag: string | string[];
 }

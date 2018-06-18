@@ -1,5 +1,5 @@
 import Validator = require('better-validator');
-import {ChildValidator} from 'better-validator/src/IsObject';
+import { ChildValidator } from 'better-validator/src/IsObject';
 import expandTilde = require('expand-tilde');
 import fs = require('fs');
 import _ = require('underscore');
@@ -7,7 +7,7 @@ import YAML = require('yamljs');
 
 const FailureFormatter = Validator.format.failure.FailureFormatter;
 
-import {IsObject} from 'better-validator/src/IsObject';
+import { IsObject } from 'better-validator/src/IsObject';
 import {
   Auth,
   IServer,
@@ -48,7 +48,7 @@ const serverRule = (server: ChildValidator) => {
   server('id').isString().isMatch(/^[\w\d-_\.]+$/);
   server('hostname').required().isString();
   server('authid').isString();
-  server('auth').isObject(() => {});
+  server('auth').isObject(() => { });
   server('ip').isString().isIn(['v4', 'v6']);
   server('port').isNumber().integer().isInRange(1, 65535);
   server('tags').isArray(item => item.required().isString());
@@ -115,9 +115,9 @@ export class Config {
   constructor(
     private auths: Auth[],
     private servers: IConfigServer[],
-  ) {}
+  ) { }
 
-  public getMatchingServers(ids?: string[], tags?: string[]): IServer[] {
+  public getMatchingServers(all: boolean, ids?: string[], tags?: string[]): IServer[] {
     if (!this.servers.length) return [];
 
     const indexAuths = this.auths
@@ -126,7 +126,7 @@ export class Config {
 
     const servers: IServer[] = [];
     for (const server of this.servers) {
-      if (!Config.isMatch(server, ids, tags)) continue;
+      if (!all && !Config.isMatch(server, ids, tags)) continue;
       servers.push({
         auth: server.auth || server.authid && indexAuths[server.authid] as Auth || undefined,
         hostname: server.hostname,

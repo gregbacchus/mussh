@@ -1,17 +1,14 @@
 import _ = require('underscore');
-import YAML = require('yamljs');
 import yargs = require('yargs');
-import {Arguments, Argv, argv} from 'yargs';
-import {Config} from './config';
-import {Runner} from './runner';
+import { Arguments, Argv } from 'yargs';
+import { Config } from './config';
+import { Runner } from './runner';
 
 import {
-  Auth,
   IRunArgs,
   ISearchArgs,
-  IServer,
 } from './types';
-import {asArray} from './util';
+import { asArray } from './util';
 
 const PATH_CONFIG = [
   '~/.mussh/config.yaml',
@@ -21,6 +18,11 @@ export class App {
 
   private static searchArgs() {
     return {
+      all: {
+        alias: 'a',
+        default: false,
+        description: 'All listed servers',
+      },
       id: {
         alias: 'i',
         description: 'ID of server (can be multiple)',
@@ -35,7 +37,7 @@ export class App {
   }
 
   private static searchCheck(argv, options) {
-    if (!argv.id && !argv.tag) return 'Either --id or --tag must be provided';
+    if (!argv.all && !argv.id && !argv.tag) return 'Either --all, --id or --tag must be provided';
     return true;
   }
 
@@ -53,6 +55,7 @@ export class App {
       .usage('Usage: $0 <command> [options]')
       .example('$0 list --help', 'learn more about the help command')
       .example('$0 run --help', 'learn more about the help command')
+      .example('$0 tags', 'list available tags')
       .demandCommand(1)
       .command(['list', 'ls'], 'show servers that match the query', (run: Argv) => {
         return run
@@ -77,6 +80,7 @@ export class App {
           }))
           .check(App.searchCheck);
       }, this.run.bind(this))
+      .command(['tags', 'tag'], 'list available tags', this.tags.bind(this))
       .argv;
   }
 
@@ -84,7 +88,7 @@ export class App {
    * `list` command
    */
   private list(argv: ISearchArgs) {
-    const servers = this.config.getMatchingServers(asArray(argv.id), asArray(argv.tag));
+    const servers = this.config.getMatchingServers(Boolean(argv.all), asArray(argv.id), asArray(argv.tag));
 
     // tslint:disable-next-line:no-console
     console.log(servers);
@@ -94,7 +98,7 @@ export class App {
    * `run` command
    */
   private run(argv: IRunArgs) {
-    const servers = this.config.getMatchingServers(asArray(argv.id), asArray(argv.tag));
+    const servers = this.config.getMatchingServers(Boolean(argv.all), asArray(argv.id), asArray(argv.tag));
 
     for (const server of servers) {
       const runner = new Runner(server);
@@ -108,5 +112,26 @@ export class App {
           .catch(console.error);
       });
     }
+  }
+
+  /**
+   * `tags` command
+   */
+  private tags(argv: IRunArgs) {
+    const servers = this.config.getMatchingServers(true);
+
+    const tags = servers.reduce<string[]>((tagList, server) => {
+      const output: string[] = tagList.slice(0);
+      if (!server.tags || !server.tags.length) { return output; }
+      server.tags.forEach(tag => {
+        if (output.indexOf(tag) >= 0) { return; }
+        output.push(tag);
+      });
+      return output;
+    }, [] as string[]);
+    tags.sort();
+
+    // tslint:disable-next-line:no-console
+    console.log(tags);
   }
 }

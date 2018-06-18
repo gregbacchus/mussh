@@ -1,4 +1,4 @@
-import {Config} from '../config';
+import { Config } from '../config';
 
 const config = new Config([], [{
   hostname: 'test1',
@@ -29,43 +29,43 @@ const config = new Config([], [{
 describe('Config', () => {
   describe('getMatchingServers', () => {
     it('must return all when no ids or tags', () => {
-      const servers = config.getMatchingServers();
+      const servers = config.getMatchingServers(true);
       expect(servers.length).toBe(6);
     });
 
     it('must match single id', () => {
-      const servers = config.getMatchingServers(['test1'], []);
+      const servers = config.getMatchingServers(false, ['test1'], []);
       expect(servers.length).toBe(1);
-      expect(servers).toContain(jasmine.objectContaining({id: 'test1'}));
+      expect(servers).toContain(jasmine.objectContaining({ id: 'test1' }));
     });
 
     it('must match multiple ids by union', () => {
-      const servers = config.getMatchingServers(['test1', 'test2'], []);
+      const servers = config.getMatchingServers(false, ['test1', 'test2'], []);
       expect(servers.length).toBe(2);
-      expect(servers).toContain(jasmine.objectContaining({id: 'test1'}));
-      expect(servers).toContain(jasmine.objectContaining({id: 'test2'}));
+      expect(servers).toContain(jasmine.objectContaining({ id: 'test1' }));
+      expect(servers).toContain(jasmine.objectContaining({ id: 'test2' }));
     });
 
     it('must match multiple ids in different order', () => {
-      const servers = config.getMatchingServers(['test4', 'test1'], []);
+      const servers = config.getMatchingServers(false, ['test4', 'test1'], []);
       expect(servers.length).toBe(2);
-      expect(servers).toContain(jasmine.objectContaining({id: 'test1'}));
-      expect(servers).toContain(jasmine.objectContaining({id: 'test4'}));
+      expect(servers).toContain(jasmine.objectContaining({ id: 'test1' }));
+      expect(servers).toContain(jasmine.objectContaining({ id: 'test4' }));
     });
 
     it('must match single tag', () => {
-      const servers = config.getMatchingServers([], ['a']);
+      const servers = config.getMatchingServers(false, [], ['a']);
       expect(servers.length).toBe(3);
-      expect(servers).toContain(jasmine.objectContaining({id: 'test2'}));
-      expect(servers).toContain(jasmine.objectContaining({id: 'test3'}));
-      expect(servers).toContain(jasmine.objectContaining({id: 'test4'}));
+      expect(servers).toContain(jasmine.objectContaining({ id: 'test2' }));
+      expect(servers).toContain(jasmine.objectContaining({ id: 'test3' }));
+      expect(servers).toContain(jasmine.objectContaining({ id: 'test4' }));
     });
 
     it('must match multiple tags by intersection', () => {
-      const servers = config.getMatchingServers([], ['b', 'a']);
+      const servers = config.getMatchingServers(false, [], ['b', 'a']);
       expect(servers.length).toBe(2);
-      expect(servers).toContain(jasmine.objectContaining({id: 'test3'}));
-      expect(servers).toContain(jasmine.objectContaining({id: 'test4'}));
+      expect(servers).toContain(jasmine.objectContaining({ id: 'test3' }));
+      expect(servers).toContain(jasmine.objectContaining({ id: 'test4' }));
     });
   });
 });
